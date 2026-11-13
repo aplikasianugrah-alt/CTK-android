@@ -1,0 +1,19 @@
+# Gradle and Android Studio
+.gradle/
+.idea/
+.kotlin/
+**/build/
+*.iml
+gradle/gradle-daemon-jvm.properties
+
+# Local machine configuration
+local.properties
+
+# Signing credentials
+*.jks
+*.keystore
+keystore.properties
+
+# OS files
+.DS_Store
+Thumbs.db

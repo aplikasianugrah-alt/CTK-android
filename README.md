@@ -1,0 +1,33 @@
+# CTK Kasir Android
+
+Aplikasi Android Kotlin khusus tampilan **Katalog/Kasir** yang terhubung langsung ke:
+
+`https://ctk.aplikasianugrah.workers.dev/`
+
+## Sinkronisasi
+
+- Aplikasi tidak membuat database produk atau transaksi terpisah.
+- WebView memakai aplikasi web dan backend produksi yang sama.
+- Perubahan produk, harga, stok, transaksi, dan tampilan web otomatis digunakan oleh Android saat halaman memuat data terbaru.
+- Cookie/sesi disimpan agar login tetap aktif.
+- Cetak struk dari web diarahkan ke dialog cetak Android.
+
+## Mode kasir
+
+- Setelah halaman siap, aplikasi otomatis membuka menu **Kasir**.
+- Sidebar dan tombol navigasi administrasi disembunyikan pada APK.
+- Tautan dari domain lain dibuka oleh aplikasi eksternal, bukan di dalam WebView.
+- Jika koneksi gagal, aplikasi menampilkan halaman coba lagi.
+
+> Pembatasan APK ini adalah pembatasan antarmuka. Hak akses dan keamanan data tetap harus diterapkan pada role pengguna di backend web.
+
+## Build APK
+
+Gunakan JDK 17 dari Android Studio, lalu jalankan:
+
+```powershell
+.\gradlew.bat assembleDebug
+```
+
+Hasil APK debug: `app/build/outputs/apk/debug/app-debug.apk`.
+

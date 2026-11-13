@@ -1,0 +1,7 @@
+<resources>
+    <color name="brand_brown">#3A241C</color>
+    <color name="brand_green">#2F6C50</color>
+    <color name="app_background">#F6F3EE</color>
+    <color name="text_primary">#2B211D</color>
+    <color name="text_secondary">#6F625C</color>
+</resources>
