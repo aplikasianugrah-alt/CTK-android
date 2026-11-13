@@ -211,44 +211,267 @@ class MainActivity : Activity() {
           const cashierButton = () => [...document.querySelectorAll('#mainNav button, nav button')]
             .find(button => normalize(button.textContent).startsWith('kasir'));
 
-          if (!document.querySelector('#ctk-android-cashier-style')) {
-            const style = document.createElement('style');
-            style.id = 'ctk-android-cashier-style';
-            style.textContent = `
-              #sidebar, #sidebarEdgeBtn, #menuBtn { display: none !important; }
-              body, .app, .app-shell { padding-left: 0 !important; grid-template-columns: minmax(0, 1fr) !important; }
-              main, .main, #mainContent, .content-wrapper {
-                grid-column: 1 !important; margin-left: 0 !important;
-                width: 100% !important; max-width: none !important; min-width: 0 !important;
-              }
-              @media (max-width: 760px) {
-                .content, main { padding-left: 10px !important; padding-right: 10px !important; }
-                header { padding-left: 12px !important; padding-right: 12px !important; }
-              }
-            `;
-            document.head.appendChild(style);
+          if (window.__ctkAndroidCashierInstalled && !window.__ctkAndroidCashierV2Installed) {
+            location.reload();
+            return;
           }
 
-          if (!window.__ctkAndroidCashierInstalled) {
-            window.__ctkAndroidCashierInstalled = true;
-            let navigationPending = false;
+          let style = document.querySelector('#ctk-android-cashier-style');
+          if (!style) {
+            style = document.createElement('style');
+            style.id = 'ctk-android-cashier-style';
+            document.head.appendChild(style);
+          }
+          style.textContent = `
+            #menuBtn {
+              display: inline-flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            .ctk-category-wrap {
+              display: flex;
+              gap: 8px;
+              overflow-x: auto;
+              padding: 12px 0 8px;
+              scrollbar-width: none;
+              -webkit-overflow-scrolling: touch;
+            }
+            .ctk-category-wrap::-webkit-scrollbar { display: none; }
+            .ctk-category-chip {
+              flex: 0 0 auto;
+              border: 1px solid #d8d2ca;
+              border-radius: 999px;
+              background: #fff;
+              color: #493a33;
+              min-height: 38px;
+              padding: 8px 14px;
+              font: inherit;
+              font-weight: 700;
+              cursor: pointer;
+            }
+            .ctk-category-chip.active {
+              border-color: #2f6c50;
+              background: #2f6c50;
+              color: #fff;
+            }
+            .product-tile.ctk-hidden { display: none !important; }
+            .ctk-pagination {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-wrap: wrap;
+              gap: 6px;
+              padding: 18px 0 4px;
+            }
+            .ctk-page-button {
+              min-width: 38px;
+              min-height: 38px;
+              border: 1px solid #d8d2ca;
+              border-radius: 10px;
+              background: #fff;
+              color: #493a33;
+              font: inherit;
+              font-weight: 700;
+              cursor: pointer;
+            }
+            .ctk-page-button.active {
+              border-color: #2f6c50;
+              background: #2f6c50;
+              color: #fff;
+            }
+            .ctk-page-button:disabled { cursor: default; opacity: .45; }
+            .ctk-page-gap { padding: 0 3px; color: #756b65; }
+            @media (max-width: 760px) {
+              .page-content { padding-left: 10px !important; padding-right: 10px !important; }
+              .topbar { padding-left: 12px !important; padding-right: 12px !important; }
+              .ctk-category-chip { min-height: 36px; padding: 7px 12px; }
+            }
+          `;
+
+          const categoryRules = [
+            ['Cincin', /cincin|ring/],
+            ['Bando', /bando|headband|bandana/],
+            ['Anting', /anting|earring/],
+            ['Gelang', /gelang|bracelet/],
+            ['Kalung', /kalung|necklace/],
+            ['Jepit', /jepit|hair clip|clip rambut/],
+            ['Ikat Rambut', /ikat rambut|kuncir|scrunchie|hair tie/],
+            ['Bros', /bros|brooch/],
+            ['Tas', /\btas\b|bag/],
+            ['Dompet', /dompet|wallet/],
+            ['Gantungan Kunci', /gantungan|g kunci|keychain/],
+            ['Jam', /\bjam\b|watch/],
+            ['Kacamata', /kacamata|sunglass/]
+          ];
+          const categoryOf = name => {
+            const value = normalize(name);
+            return categoryRules.find(entry => entry[1].test(value))?.[0] || 'Lainnya';
+          };
+          const catalogState = window.__ctkCatalogState || {
+            category: 'Semua', page: 1, perPage: 12, itemsSignature: ''
+          };
+          window.__ctkCatalogState = catalogState;
+
+          const createButton = (text, className, onClick) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = className;
+            button.textContent = text;
+            button.addEventListener('click', onClick);
+            return button;
+          };
+
+          const drawCategoryBar = categories => {
+            const toolbar = document.querySelector('.pos-catalog-toolbar');
+            if (!toolbar) return;
+            let bar = document.querySelector('#ctkCategoryBar');
+            if (!bar) {
+              bar = document.createElement('div');
+              bar.id = 'ctkCategoryBar';
+              bar.className = 'ctk-category-wrap';
+              bar.setAttribute('aria-label', 'Kategori produk');
+              toolbar.insertAdjacentElement('afterend', bar);
+            }
+            const signature = categories.join('|') + '::' + catalogState.category;
+            if (bar.dataset.signature === signature) return;
+            bar.dataset.signature = signature;
+            bar.replaceChildren();
+            categories.forEach(category => {
+              const button = createButton(category, 'ctk-category-chip', () => {
+                catalogState.category = category;
+                catalogState.page = 1;
+                window.__ctkApplyCatalog?.();
+              });
+              button.classList.toggle('active', category === catalogState.category);
+              button.setAttribute('aria-pressed', String(category === catalogState.category));
+              bar.appendChild(button);
+            });
+          };
+
+          const pageNumbers = total => {
+            if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+            const current = catalogState.page;
+            const values = [1];
+            if (current > 3) values.push('…');
+            for (let page = Math.max(2, current - 1); page <= Math.min(total - 1, current + 1); page++) {
+              values.push(page);
+            }
+            if (current < total - 2) values.push('…');
+            values.push(total);
+            return values;
+          };
+
+          const drawPagination = (grid, totalItems, totalPages) => {
+            let pager = document.querySelector('#ctkPagination');
+            if (!pager) {
+              pager = document.createElement('nav');
+              pager.id = 'ctkPagination';
+              pager.className = 'ctk-pagination';
+              pager.setAttribute('aria-label', 'Halaman katalog');
+              grid.insertAdjacentElement('afterend', pager);
+            }
+            const signature = [totalItems, totalPages, catalogState.page].join('|');
+            if (pager.dataset.signature === signature) return;
+            pager.dataset.signature = signature;
+            pager.replaceChildren();
+            if (totalPages <= 1) {
+              pager.hidden = true;
+              return;
+            }
+            pager.hidden = false;
+            const previous = createButton('‹', 'ctk-page-button', () => {
+              catalogState.page = Math.max(1, catalogState.page - 1);
+              window.__ctkApplyCatalog?.();
+              grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            previous.disabled = catalogState.page === 1;
+            previous.setAttribute('aria-label', 'Halaman sebelumnya');
+            pager.appendChild(previous);
+            pageNumbers(totalPages).forEach(value => {
+              if (value === '…') {
+                const gap = document.createElement('span');
+                gap.className = 'ctk-page-gap';
+                gap.textContent = value;
+                pager.appendChild(gap);
+                return;
+              }
+              const button = createButton(String(value), 'ctk-page-button', () => {
+                catalogState.page = value;
+                window.__ctkApplyCatalog?.();
+                grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              });
+              button.classList.toggle('active', value === catalogState.page);
+              button.setAttribute('aria-current', value === catalogState.page ? 'page' : 'false');
+              pager.appendChild(button);
+            });
+            const next = createButton('›', 'ctk-page-button', () => {
+              catalogState.page = Math.min(totalPages, catalogState.page + 1);
+              window.__ctkApplyCatalog?.();
+              grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            next.disabled = catalogState.page === totalPages;
+            next.setAttribute('aria-label', 'Halaman berikutnya');
+            pager.appendChild(next);
+          };
+
+          window.__ctkApplyCatalog = () => {
+            const grid = document.querySelector('#productGrid');
+            if (!grid) return;
+            const tiles = [...grid.querySelectorAll('.product-tile')];
+            const namedTiles = tiles.map(tile => {
+              const name = tile.querySelector('.product-tile-info b')?.textContent || '';
+              return { tile, name, category: categoryOf(name) };
+            });
+            const itemsSignature = namedTiles.map(item => item.name).join('|');
+            if (itemsSignature !== catalogState.itemsSignature) {
+              catalogState.itemsSignature = itemsSignature;
+              catalogState.page = 1;
+            }
+            const order = categoryRules.map(entry => entry[0]).concat('Lainnya');
+            const available = new Set(namedTiles.map(item => item.category));
+            const categories = ['Semua'].concat(order.filter(category => available.has(category)));
+            if (!categories.includes(catalogState.category)) catalogState.category = 'Semua';
+            drawCategoryBar(categories);
+
+            const filtered = catalogState.category === 'Semua'
+              ? namedTiles
+              : namedTiles.filter(item => item.category === catalogState.category);
+            const totalPages = Math.max(1, Math.ceil(filtered.length / catalogState.perPage));
+            catalogState.page = Math.min(Math.max(1, catalogState.page), totalPages);
+            const start = (catalogState.page - 1) * catalogState.perPage;
+            const visible = new Set(filtered.slice(start, start + catalogState.perPage).map(item => item.tile));
+            tiles.forEach(tile => tile.classList.toggle('ctk-hidden', !visible.has(tile)));
+
+            const resultCount = document.querySelector('#posResultCount');
+            if (resultCount) {
+              resultCount.textContent = filtered.length + ' hasil · Halaman ' + catalogState.page + '/' + totalPages;
+            }
+            drawPagination(grid, filtered.length, totalPages);
+
+            const search = document.querySelector('#posSearch');
+            if (search && !search.dataset.ctkPaginationBound) {
+              search.dataset.ctkPaginationBound = '1';
+              search.addEventListener('input', () => { catalogState.page = 1; }, { capture: true });
+            }
+          };
+
+          if (!window.__ctkAndroidCashierV2Installed) {
+            window.__ctkAndroidCashierV2Installed = true;
+            let cashierOpened = false;
 
             window.__ctkOpenCashier = () => {
-              if (isCashier() || navigationPending) return;
+              if (cashierOpened) return;
+              const appView = document.querySelector('#appView');
+              if (!appView || appView.classList.contains('hidden')) return;
+              if (isCashier()) {
+                cashierOpened = true;
+                return;
+              }
               const button = cashierButton();
               if (!button) return;
-              navigationPending = true;
+              cashierOpened = true;
               button.click();
-              setTimeout(() => { navigationPending = false; }, 700);
             };
-
-            document.addEventListener('click', event => {
-              const button = event.target.closest('#mainNav button, nav button');
-              if (!button || normalize(button.textContent).startsWith('kasir')) return;
-              event.preventDefault();
-              event.stopImmediatePropagation();
-              window.__ctkOpenCashier();
-            }, true);
 
             if (window.NativeCashier) {
               window.print = () => window.NativeCashier.printReceipt();
@@ -261,11 +484,13 @@ class MainActivity : Activity() {
               requestAnimationFrame(() => {
                 scheduled = false;
                 window.__ctkOpenCashier();
+                window.__ctkApplyCatalog();
               });
             }).observe(document.documentElement, { childList: true, subtree: true });
           }
 
           window.__ctkOpenCashier?.();
+          window.__ctkApplyCatalog?.();
         })();
     """.trimIndent()
 }

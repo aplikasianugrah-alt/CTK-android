@@ -15,7 +15,9 @@ Aplikasi Android Kotlin khusus tampilan **Katalog/Kasir** yang terhubung langsun
 ## Mode kasir
 
 - Setelah halaman siap, aplikasi otomatis membuka menu **Kasir**.
-- Sidebar dan tombol navigasi administrasi disembunyikan pada APK.
+- Tombol hamburger dan sidebar web tetap tersedia untuk navigasi sesuai hak akses akun.
+- Katalog kasir memiliki filter kategori otomatis seperti Cincin, Bando, Anting, Gelang, dan kategori produk lainnya.
+- Produk ditampilkan 12 item per halaman dengan navigasi pagination.
 - Tautan dari domain lain dibuka oleh aplikasi eksternal, bukan di dalam WebView.
 - Jika koneksi gagal, aplikasi menampilkan halaman coba lagi.
 
