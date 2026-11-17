@@ -2,7 +2,7 @@
 
 Aplikasi Android Kotlin khusus tampilan **Katalog/Kasir** yang terhubung langsung ke:
 
-`https://ctk.aplikasianugrah.workers.dev/`
+`https://aksesoris.anugrahsatu.com/`
 
 ## Sinkronisasi
 

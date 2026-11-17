@@ -27,8 +27,8 @@ import android.widget.ProgressBar
 class MainActivity : Activity() {
 
     companion object {
-        private const val APP_URL = "https://ctk.aplikasianugrah.workers.dev/"
-        private const val APP_HOST = "ctk.aplikasianugrah.workers.dev"
+        private const val APP_URL = "https://aksesoris.anugrahsatu.com/"
+        private const val APP_HOST = "aksesoris.anugrahsatu.com"
     }
 
     private lateinit var webView: WebView
