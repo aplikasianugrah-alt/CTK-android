@@ -211,7 +211,8 @@ class MainActivity : Activity() {
           const cashierButton = () => [...document.querySelectorAll('#mainNav button, nav button')]
             .find(button => normalize(button.textContent).startsWith('kasir'));
 
-          if (window.__ctkAndroidCashierInstalled && !window.__ctkAndroidCashierV2Installed) {
+          if ((window.__ctkAndroidCashierInstalled || window.__ctkAndroidCashierV2Installed) &&
+              !window.__ctkAndroidCashierV3Installed) {
             location.reload();
             return;
           }
@@ -455,8 +456,64 @@ class MainActivity : Activity() {
             }
           };
 
-          if (!window.__ctkAndroidCashierV2Installed) {
+          const transactionRefresh = window.__ctkTransactionRefresh || {
+            pending: false,
+            skipCashier: false
+          };
+          window.__ctkTransactionRefresh = transactionRefresh;
+
+          window.__ctkApplyTransactionRefresh = () => {
+            const receipt = document.querySelector('#modal .receipt');
+            const success = receipt && normalize(receipt.textContent).includes('pembayaran berhasil');
+            if (success && !receipt.dataset.ctkTransactionHandled) {
+              receipt.dataset.ctkTransactionHandled = '1';
+              transactionRefresh.pending = true;
+              transactionRefresh.skipCashier = false;
+
+              const clearCart = document.querySelector('#clearCart:not([disabled])');
+              clearCart?.click();
+
+              const viewSale = receipt.querySelector('#viewSale');
+              viewSale?.addEventListener('click', () => {
+                transactionRefresh.skipCashier = true;
+              }, { capture: true, once: true });
+            }
+
+            const modal = document.querySelector('#modal');
+            if (modal && !modal.dataset.ctkRefreshObserver) {
+              modal.dataset.ctkRefreshObserver = '1';
+              new MutationObserver(() => {
+                if (!transactionRefresh.pending || !modal.classList.contains('hidden')) return;
+                const skip = transactionRefresh.skipCashier;
+                transactionRefresh.pending = false;
+                transactionRefresh.skipCashier = false;
+                if (!skip) {
+                  setTimeout(() => cashierButton()?.click(), 350);
+                }
+              }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+            }
+          };
+
+          const depositRefresh = window.__ctkDepositRefresh || {
+            pending: false,
+            ready: false,
+            originalButton: null
+          };
+          window.__ctkDepositRefresh = depositRefresh;
+
+          window.__ctkApplyFreshDeposit = () => {
+            if (!depositRefresh.pending) return;
+            const freshButton = document.querySelector('#addDeposit');
+            if (!freshButton || freshButton === depositRefresh.originalButton) return;
+            depositRefresh.pending = false;
+            depositRefresh.ready = true;
+            depositRefresh.originalButton = null;
+            requestAnimationFrame(() => freshButton.click());
+          };
+
+          if (!window.__ctkAndroidCashierV3Installed) {
             window.__ctkAndroidCashierV2Installed = true;
+            window.__ctkAndroidCashierV3Installed = true;
             let cashierOpened = false;
 
             window.__ctkOpenCashier = () => {
@@ -477,6 +534,33 @@ class MainActivity : Activity() {
               window.print = () => window.NativeCashier.printReceipt();
             }
 
+            document.addEventListener('click', event => {
+              const addDeposit = event.target.closest('#addDeposit');
+              if (!addDeposit) return;
+              if (depositRefresh.ready) {
+                depositRefresh.ready = false;
+                return;
+              }
+              if (depositRefresh.pending) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+              }
+
+              const depositsNav = document.querySelector(
+                '#mainNav [data-page="deposits"], .bottom-nav [data-page="deposits"]'
+              );
+              if (!depositsNav) return;
+
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              depositRefresh.pending = true;
+              depositRefresh.originalButton = addDeposit;
+              addDeposit.disabled = true;
+              addDeposit.textContent = '↻ Memuat cash terbaru…';
+              depositsNav.click();
+            }, true);
+
             let scheduled = false;
             new MutationObserver(() => {
               if (scheduled) return;
@@ -485,12 +569,16 @@ class MainActivity : Activity() {
                 scheduled = false;
                 window.__ctkOpenCashier();
                 window.__ctkApplyCatalog();
+                window.__ctkApplyTransactionRefresh();
+                window.__ctkApplyFreshDeposit();
               });
             }).observe(document.documentElement, { childList: true, subtree: true });
           }
 
           window.__ctkOpenCashier?.();
           window.__ctkApplyCatalog?.();
+          window.__ctkApplyTransactionRefresh?.();
+          window.__ctkApplyFreshDeposit?.();
         })();
     """.trimIndent()
 }
