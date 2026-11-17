@@ -20,6 +20,7 @@ Aplikasi Android Kotlin khusus tampilan **Katalog/Kasir** yang terhubung langsun
 - Produk ditampilkan 12 item per halaman dengan navigasi pagination.
 - Keranjang dibersihkan dan katalog dirender ulang otomatis setelah transaksi berhasil.
 - Tombol tambah setoran selalu memuat ulang cash penjualan terbaru milik kasir sebelum membuka formulir.
+- Input gambar produk membuka pemilih foto/file Android dan menerima akses URI yang dipilih pengguna.
 - Tautan dari domain lain dibuka oleh aplikasi eksternal, bukan di dalam WebView.
 - Jika koneksi gagal, aplikasi menampilkan halaman coba lagi.
 

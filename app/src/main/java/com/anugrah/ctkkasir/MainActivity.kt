@@ -21,6 +21,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.ValueCallback
 import android.widget.Button
 import android.widget.ProgressBar
 
@@ -29,11 +30,13 @@ class MainActivity : Activity() {
     companion object {
         private const val APP_URL = "https://aksesoris.anugrahsatu.com/"
         private const val APP_HOST = "aksesoris.anugrahsatu.com"
+        private const val FILE_CHOOSER_REQUEST_CODE = 1001
     }
 
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar
     private lateinit var errorView: View
+    private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
 
     @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,6 +107,28 @@ class MainActivity : Activity() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 progressBar.progress = newProgress
                 progressBar.visibility = if (newProgress in 0..99) View.VISIBLE else View.GONE
+            }
+
+            @Suppress("DEPRECATION")
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
+            ): Boolean {
+                fileChooserCallback?.onReceiveValue(null)
+                fileChooserCallback = filePathCallback
+
+                return try {
+                    val intent = fileChooserParams.createIntent().apply {
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
+                    true
+                } catch (_: Exception) {
+                    fileChooserCallback?.onReceiveValue(null)
+                    fileChooserCallback = null
+                    false
+                }
             }
         }
 
@@ -187,6 +212,17 @@ class MainActivity : Activity() {
     }
 
     @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            val result = WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+            fileChooserCallback?.onReceiveValue(result)
+            fileChooserCallback = null
+            return
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    @Deprecated("Deprecated in Java")
     @SuppressLint("GestureBackNavigation")
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
@@ -198,6 +234,8 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        fileChooserCallback?.onReceiveValue(null)
+        fileChooserCallback = null
         webView.removeJavascriptInterface("NativeCashier")
         webView.stopLoading()
         webView.destroy()
