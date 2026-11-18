@@ -250,7 +250,8 @@ class MainActivity : Activity() {
             .find(button => normalize(button.textContent).startsWith('kasir'));
 
           if ((window.__ctkAndroidCashierInstalled || window.__ctkAndroidCashierV2Installed ||
-              window.__ctkAndroidCashierV3Installed) && !window.__ctkAndroidCashierV4Installed) {
+              window.__ctkAndroidCashierV3Installed || window.__ctkAndroidCashierV4Installed) &&
+              !window.__ctkAndroidCashierV5Installed) {
             location.reload();
             return;
           }
@@ -294,6 +295,29 @@ class MainActivity : Activity() {
               color: #fff;
             }
             .product-tile.ctk-hidden { display: none !important; }
+            .product-stock-pill {
+              background: #087a5b !important;
+              color: #ffffff !important;
+              border: 1px solid rgba(255, 255, 255, .55) !important;
+              padding: 6px 9px !important;
+              font-size: 10px !important;
+              font-weight: 900 !important;
+              line-height: 1.1 !important;
+              letter-spacing: .01em !important;
+              text-shadow: 0 1px 2px rgba(0, 0, 0, .3) !important;
+              box-shadow: 0 4px 12px rgba(4, 70, 52, .26) !important;
+              white-space: nowrap !important;
+            }
+            .product-stock-pill.low-stock {
+              background: #a95d00 !important;
+              color: #ffffff !important;
+              box-shadow: 0 4px 12px rgba(114, 61, 0, .28) !important;
+            }
+            .product-stock-pill.empty-stock {
+              background: #b52f35 !important;
+              color: #ffffff !important;
+              box-shadow: 0 4px 12px rgba(114, 21, 27, .28) !important;
+            }
             .ctk-pagination {
               display: flex;
               align-items: center;
@@ -711,6 +735,15 @@ class MainActivity : Activity() {
             const grid = document.querySelector('#productGrid');
             if (!grid) return;
             const tiles = [...grid.querySelectorAll('.product-tile')];
+            tiles.forEach(tile => {
+              const stock = tile.querySelector('.product-stock-pill');
+              if (!stock) return;
+              const current = normalize(stock.textContent);
+              const amount = current.match(/\d+/)?.[0];
+              stock.textContent = stock.classList.contains('empty-stock') || current.includes('habis')
+                ? 'Stok habis'
+                : amount ? 'Stok: ' + amount : stock.textContent;
+            });
             const namedTiles = tiles.map(tile => {
               const name = tile.querySelector('.product-tile-info b')?.textContent || '';
               return { tile, name, category: categoryOf(name) };
@@ -820,10 +853,11 @@ class MainActivity : Activity() {
             requestAnimationFrame(() => freshButton.click());
           };
 
-          if (!window.__ctkAndroidCashierV4Installed) {
+          if (!window.__ctkAndroidCashierV5Installed) {
             window.__ctkAndroidCashierV2Installed = true;
             window.__ctkAndroidCashierV3Installed = true;
             window.__ctkAndroidCashierV4Installed = true;
+            window.__ctkAndroidCashierV5Installed = true;
             let cashierOpened = false;
 
             window.__ctkOpenCashier = () => {
