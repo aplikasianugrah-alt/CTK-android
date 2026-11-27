@@ -1,0 +1,38 @@
+{
+  "id": "/",
+  "name": "CTK Kasir",
+  "short_name": "CTK Kasir",
+  "description": "Kasir, inventory, pembelian, dan laporan Cantik Aksesoris Anugrah Grup.",
+  "lang": "id-ID",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#071D35",
+  "theme_color": "#071D35",
+  "icons": [
+    {
+      "src": "/icons/icon-192-v3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512-v3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192-v3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512-v3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -28,6 +28,13 @@ Aplikasi Android Kotlin khusus tampilan **Katalog/Kasir** yang terhubung langsun
 
 > Pembatasan APK ini adalah pembatasan antarmuka. Hak akses dan keamanan data tetap harus diterapkan pada role pengguna di backend web.
 
+## Ikon aplikasi
+
+- Launcher Android memakai adaptive icon biru-navy dengan foreground CTK HD, round icon, fallback untuk Android 7, dan monochrome themed icon untuk Android 13+.
+- Versi aplikasi dinaikkan ke `1.6.1` (`versionCode 9`) agar APK dapat memperbarui instalasi lama dengan package ID yang sama.
+- Aset dan petunjuk deploy PWA tersedia di `pwa/`. Nama ikon menggunakan suffix `-v3` untuk memutus cache ikon lama.
+- Master transparan ada di `branding/ctk-icon-master-1024.png`. Jalankan `tools/Generate-IconAssets.ps1` bila seluruh ukuran perlu dibuat ulang.
+
 ## Build APK
 
 Gunakan JDK 17 dari Android Studio, lalu jalankan:
