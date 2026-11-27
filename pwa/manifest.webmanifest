@@ -4,7 +4,7 @@
   "short_name": "CTK Kasir",
   "description": "Kasir, inventory, pembelian, dan laporan Cantik Aksesoris Anugrah Grup.",
   "lang": "id-ID",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#071D35",

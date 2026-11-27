@@ -2,6 +2,8 @@
 
 Folder ini berisi aset PWA siap salin ke document root situs produksi.
 
+Untuk domain produksi CTK, jalankan `wrangler deploy --config cloudflare/wrangler.jsonc` dari root repositori. Worker `ctk-pwa-icons` menambahkan tautan pada HTML yang disajikan oleh Worker produksi `ctk` dan melayani aset PWA.
+
 1. Salin `icons/`, `manifest.webmanifest`, dan `sw.js` ke root situs sehingga URL-nya menjadi `/icons/...`, `/manifest.webmanifest`, dan `/sw.js`.
 2. Tambahkan ke `<head>`:
 

@@ -1,0 +1,24 @@
+{
+  "name": "ctk-pwa-icons",
+  "main": "pwa-icons.mjs",
+  "compatibility_date": "2026-11-27",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "../pwa",
+    "binding": "PWA_ASSETS",
+    "run_worker_first": true
+  },
+  "routes": [
+    { "pattern": "https://aksesoris.anugrahsatu.com/", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/manifest.webmanifest*", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/icons/favicon-32-v3.png", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/icons/icon-180-v3.png", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/icons/icon-192-v3.png", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/icons/icon-512-v3.png", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/icons/icon-maskable-192-v3.png", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/icons/icon-maskable-512-v3.png", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/sw.js", "zone_name": "anugrahsatu.com" },
+    { "pattern": "https://aksesoris.anugrahsatu.com/ctk-pwa-register.js", "zone_name": "anugrahsatu.com" }
+  ]
+}

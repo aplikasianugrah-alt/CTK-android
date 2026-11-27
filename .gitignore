@@ -2,6 +2,7 @@
 .gradle/
 .idea/
 .kotlin/
+.wrangler/
 **/build/
 *.iml
 gradle/gradle-daemon-jvm.properties
